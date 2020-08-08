@@ -48,9 +48,16 @@ static void *handle;
             #include "modelHandler_CUDA.ptx20.h"
             ;
     #endif // CUDART_VERSION < 9000
-    static const char prog30[] =
-        #include "modelHandler_CUDA.ptx30.h"
-	;
+    #if CUDART_VERSION < 11000
+        static const char prog30[] =
+            #include "modelHandler_CUDA.ptx30.h"
+            ;
+    #endif // CUDART_VERSION < 11000
+    #if CUDART_VERSION >= 11000
+        static const char prog60[] =
+            #include "modelHandler_CUDA.ptx60.h"
+            ;
+    #endif // CUDART_VERSION >= 11000
 #endif // HAVE_CUDA
 
 
@@ -172,9 +179,17 @@ namespace w2xc
 			return false;
 		}
 
-		const char *prog = prog30;
-		// cuda 9.0 doesn't support Compute 20
+		const char *prog;
 
+#if CUDART_VERSION >= 11000
+		prog = prog60;
+#endif // CUDART_VERSION >= 11000
+
+#if CUDART_VERSION < 11000
+		prog = prog30;
+#endif // CUDART_VERSION < 11000
+
+// cuda 9.0 doesn't support Compute 20
 #if CUDART_VERSION < 9000
 		if (cap_major < 3)
 		{

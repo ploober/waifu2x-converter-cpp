@@ -366,32 +366,46 @@ add_custom_command(
 set(GPU_CODE modelHandler_OpenCL.cl.h)
 
 if(CUDA_FOUND)
-    if (CUDA_VERSION_MAJOR LESS 9)
+    if (CUDA_VERSION_MAJOR LESS 11)
+        if (CUDA_VERSION_MAJOR LESS 9)
+            add_custom_command(
+                OUTPUT modelHandler_CUDA.ptx20.h
+                COMMAND ${CONV_EXE} modelHandler_CUDA.ptx20 modelHandler_CUDA.ptx20.h str
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20 conv
+            )
+            add_custom_command(
+                OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20
+                COMMAND ${CUDA_NVCC_EXECUTABLE} ${CUDA_NVCC_FLAGS} -arch=sm_20 -ptx -o ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20 ${CMAKE_CURRENT_SOURCE_DIR}/src/modelHandler_CUDA.cu
+                DEPENDS src/modelHandler_CUDA.cu
+            )
+        endif()
         add_custom_command(
-            OUTPUT modelHandler_CUDA.ptx20.h
-            COMMAND ${CONV_EXE} modelHandler_CUDA.ptx20 modelHandler_CUDA.ptx20.h str
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20 conv
+            OUTPUT modelHandler_CUDA.ptx30.h
+            COMMAND ${CONV_EXE} modelHandler_CUDA.ptx30 modelHandler_CUDA.ptx30.h str
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30 conv
         )
         add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20
-            COMMAND ${CUDA_NVCC_EXECUTABLE} ${CUDA_NVCC_FLAGS} -arch=sm_20 -ptx -o ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx20 ${CMAKE_CURRENT_SOURCE_DIR}/src/modelHandler_CUDA.cu
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30
+            COMMAND ${CUDA_NVCC_EXECUTABLE} ${CUDA_NVCC_FLAGS} -arch=sm_30 -ptx -o ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30 ${CMAKE_CURRENT_SOURCE_DIR}/src/modelHandler_CUDA.cu
             DEPENDS src/modelHandler_CUDA.cu
         )
-    endif()
-    add_custom_command(
-        OUTPUT modelHandler_CUDA.ptx30.h
-        COMMAND ${CONV_EXE} modelHandler_CUDA.ptx30 modelHandler_CUDA.ptx30.h str
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30 conv
-    )
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30
-        COMMAND ${CUDA_NVCC_EXECUTABLE} ${CUDA_NVCC_FLAGS} -arch=sm_30 -ptx -o ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx30 ${CMAKE_CURRENT_SOURCE_DIR}/src/modelHandler_CUDA.cu
-        DEPENDS src/modelHandler_CUDA.cu
-    )
-    if (CUDA_VERSION_MAJOR LESS 9)
-        set(GPU_CODE ${GPU_CODE} modelHandler_CUDA.ptx30.h modelHandler_CUDA.ptx20.h)
+        if (CUDA_VERSION_MAJOR LESS 9)
+            set(GPU_CODE ${GPU_CODE} modelHandler_CUDA.ptx30.h modelHandler_CUDA.ptx20.h)
+        else()
+            set(GPU_CODE ${GPU_CODE} modelHandler_CUDA.ptx30.h)
+        endif()
     else()
-        set(GPU_CODE ${GPU_CODE} modelHandler_CUDA.ptx30.h)
+        add_custom_command(
+            OUTPUT modelHandler_CUDA.ptx60.h
+            COMMAND ${CONV_EXE} modelHandler_CUDA.ptx60 modelHandler_CUDA.ptx60.h str
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx60 conv
+        )
+        add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx60
+            COMMAND ${CUDA_NVCC_EXECUTABLE} ${CUDA_NVCC_FLAGS} -arch=sm_60 -ptx -o ${CMAKE_CURRENT_BINARY_DIR}/modelHandler_CUDA.ptx60 ${CMAKE_CURRENT_SOURCE_DIR}/src/modelHandler_CUDA.cu
+            DEPENDS src/modelHandler_CUDA.cu
+        )
+        set(GPU_CODE ${GPU_CODE} modelHandler_CUDA.ptx60.h)
     endif()
 endif()
 
